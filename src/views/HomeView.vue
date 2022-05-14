@@ -20,7 +20,7 @@ function search() {
 
 <template>
   <div class="h-[80vh] bg-sky-800 px-6 flex flex-col gap-8 items-center justify-center">
-    <h2 class="text-white">Pesquisar processos</h2>
+    <h2 class="text-white">Pesquisar processo</h2>
     <SearchBar v-model="cnj" ref="input" @submit="search" class="max-w-[50vw]"></SearchBar>
   </div>
 </template>
