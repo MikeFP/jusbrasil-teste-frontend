@@ -10,6 +10,10 @@ export default class Anexo {
     public titulo?: string
   ) {}
 
+  get descricaoTipo(): string {
+    return TipoAnexo.getDescricao(this.tipo);
+  }
+
   static parseTuple(tuple: any[]) {
     const [id, urlDownload, tipo, dataPublicacao] = tuple.slice(0, 4);
     const conteudo = tuple.length == 8 ? tuple[4] : undefined;

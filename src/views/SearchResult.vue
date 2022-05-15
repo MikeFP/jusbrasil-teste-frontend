@@ -3,6 +3,7 @@ import type Processo from "@/classes/processo";
 import { computed, defineComponent, ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import Chip from "../components/Chip.vue";
+import IconLabel from "../components/IconLabel.vue";
 import { processo as mock } from "../classes/mocks";
 import { RouterLink } from "vue-router";
 import { apiStore } from "../stores/api";
@@ -37,9 +38,9 @@ const classForEstado = computed(() => {
   const estado = estadoProcesso.value;
   let className = "font-semibold";
   if (estado == "Arquivado") {
-    className = "border-none bg-orange-400 text-white";
+    className = "border-transparent bg-orange-400 text-white";
   } else if (estado == "Extinto") {
-    className = "border-none bg-zinc-700 text-white";
+    className = "border-transparent bg-zinc-700 text-white";
   } else if (estado != "Ativo") {
     className = "border-green-300 bg-green-200";
   }
@@ -141,24 +142,19 @@ function capitalize(value: string) {
       <div class="mt-4 bg-gray-200 px-4 pt-2 pb-3 rounded-lg flex flex-col gap-1">
         <span class="label">Foro:</span>
         {{ processo.foro }} - Vara {{ processo.vara }}
-        <div class="icon-label mt-2">
-          <font-awesome-icon icon="location-dot"></font-awesome-icon>
+        <IconLabel icon="location-dot" class="mt-2">
           <span>{{ capitalize(processo.comarca) }}</span> - {{ processo.uf }}
-        </div>
-        <div class="icon-label" v-if="processo.juiz">
-          <font-awesome-icon icon="user"></font-awesome-icon>
-          Juiz {{ processo.juiz }}
-        </div>
-        <div class="icon-label">
-          <font-awesome-icon icon="gavel"></font-awesome-icon>
+        </IconLabel>
+        <IconLabel icon="user" v-if="processo.juiz"> Juiz {{ processo.juiz }} </IconLabel>
+        <IconLabel icon="gavel">
           <span>Tribunal {{ processo.tribunal }}</span>
-        </div>
+        </IconLabel>
       </div>
 
       <button class="text-blue-800 mt-4 hover:underline">Ver mais detalhes...</button>
 
       <div class="section">
-        <h4>Processos Relacionados</h4>
+        <h3>Processos Relacionados</h3>
         <hr />
         <div class="section-list" v-for="relacionado in processo.processosRelacionados">
           <div class="title">Tribunal {{ relacionado.tribunal }} - {{ relacionado.natureza }}</div>
@@ -170,16 +166,77 @@ function capitalize(value: string) {
       </div>
 
       <div class="section">
-        <h4>Audiências</h4>
+        <h3>Audiências</h3>
         <hr />
         <div class="section-list" v-for="audiencia in processo.audiencias">
           <div class="title">{{ audiencia.tipo }} - {{ audiencia.local }}</div>
           <div class="subtitle">
-            <Chip :dense="true" class="bg-red-400 border-none text-white font-semibold">{{
+            <Chip :dense="true" class="bg-red-400 border-none text-white font-semibold lowercase">{{
               audiencia.situacao
             }}</Chip>
             {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
           </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Partes</h3>
+        <hr />
+        <div class="section-list" v-for="parte in processo.partes">
+          <div class="title">{{ parte.nome }}</div>
+          <div class="text-sm font-semibold text-gray-400 mb-1">
+            {{ parte.relacaoNormalizado }}
+          </div>
+
+          <IconLabel
+            v-if="(parte.advogados?.length || 0) > 0"
+            icon="user-tie"
+            class="text-gray-700 capitalize mt-1 mb-1"
+          >
+            {{ parte.advogados.map((a) => a.nome.toLowerCase()).join(", ") }}
+          </IconLabel>
+          <hr class="mt-1" />
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Anexos</h3>
+        <hr />
+        <div class="section-list" v-for="anexo in processo.anexos">
+          <div class="title">{{ anexo.titulo || "Sem título" }}</div>
+          <div class="subtitle">
+            <Chip
+              :dense="true"
+              class="bg-gray-200 border-transparent text-gray-600 font-semibold lowercase mr-1"
+              >{{ anexo.descricaoTipo }}</Chip
+            >
+            {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataPublicacao) }} · obtido em
+            {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataObtencao) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Movimentações</h3>
+        <hr />
+        <div class="section-list" v-for="mov in processo.movs">
+          <div class="title">{{ mov.tipo || "Sem título" }}</div>
+          <div class="subtitle">
+            {{ Intl.DateTimeFormat("pt-BR").format(mov.data) }}
+          </div>
+          <div class="flex gap-2 my-2">
+            <Chip
+              :dense="true"
+              v-for="tipoNormal in mov.tiposNormalizados"
+              class="bg-gray-200 border-transparent text-gray-600 font-semibold lowercase mr-1"
+            >
+              {{ tipoNormal.tipo }}</Chip
+            >
+          </div>
+          <p class="my-3">
+            {{ mov.texto }}
+          </p>
+          <hr />
         </div>
       </div>
     </div>
@@ -201,14 +258,6 @@ function capitalize(value: string) {
 
 .label {
   @apply font-semibold text-gray-600 mr-2;
-}
-
-.icon-label {
-  @apply flex gap-2 items-center;
-}
-
-.icon-label > :first-child {
-  @apply w-4 h-4 text-zinc-500;
 }
 
 .section {
