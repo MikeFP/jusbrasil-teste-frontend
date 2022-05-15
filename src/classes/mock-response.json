@@ -426,11 +426,11 @@
     "juiz": null,
     "area": "Trabalhista",
     "assuntoExtra": "Horas Extras,Sobreaviso / Prontid\u00e3o / Tempo \u00e0 Disposi\u00e7\u00e3o,Dura\u00e7\u00e3o do Trabalho,DIREITO DO TRABALHO",
-    "liminar": null,
+    "liminar": true,
     "audiencias": [],
     "vara_original": "22",
     "extinto": 0,
-    "gratuita": null,
+    "gratuita": true,
     "valor": 5000.0,
     "anexos": [
         [
@@ -592,7 +592,7 @@
     "tribunal": "TRT9",
     "processoID": 473469313,
     "distribuicaoData": "2022-02-15",
-    "segredo_justica": false,
+    "segredo_justica": true,
     "arquivado": false,
     "classes": [
         "Horas Extras",

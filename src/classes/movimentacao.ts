@@ -8,13 +8,13 @@ export default class Movimentacao {
     id: number,
     data: Date,
     texto: string,
-    tiposAssuntos: TipoAndamento[],
+    tiposNormalizados: TipoAndamento[],
     tipo?: string,
     juiz?: string
   ) {}
 
   static parseTuple(tuple: MovimentacaoTuple) {
-    const [data, texto, tipo, juiz, id, tipos] = tuple;
+    const [data, tipo, texto, juiz, id, tipos] = tuple;
     return new Movimentacao(id, new Date(data), texto, tipos, tipo, juiz);
   }
 }

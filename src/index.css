@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 h1 {
-    @apply text-5xl;
+  @apply text-5xl leading-[1.5em];
 }
 
 h2 {
-    @apply text-4xl;
+  @apply text-4xl leading-[1.75em];
 }
 
 body {
-    @apply bg-gray-50;
+  @apply bg-gray-50;
 }

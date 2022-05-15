@@ -11,7 +11,6 @@ onMounted(() => {
 });
 
 function search() {
-  console.log(cnj.value);
   if (cnj.value !== "") {
     router.push(`/search/${cnj.value}`);
   }
