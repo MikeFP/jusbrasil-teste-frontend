@@ -9,12 +9,18 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomeView,
+      meta: {
+        title: "Digesto | Pesquisar Processo",
+      },
     },
     {
       path: "/search/:cnj",
       name: "search",
       component: SearchResult,
       props: true,
+      meta: {
+        title: "Digesto | Resultado da pesquisa",
+      },
     },
     {
       path: "/search",

@@ -19,9 +19,12 @@ function search() {
 </script>
 
 <template>
-  <div class="h-[80vh] bg-sky-800 px-6 flex flex-col gap-8 items-center justify-center">
-    <h2 class="text-white">Pesquisar processo</h2>
-    <SearchBar v-model="cnj" ref="input" @submit="search" class="max-w-[50vw]"></SearchBar>
+  <div class="h-[80vh] bg-zinc-800 px-6 py-16 flex flex-col gap-8 items-center justify-center">
+    <div class="flex items-center gap-4">
+      <img src="./../assets/logo.png" alt="Logo Digesto" class="w-16 h-16" />
+      <h2 class="text-red-200">Pesquisar processo</h2>
+    </div>
+    <SearchBar v-model="cnj" ref="input" @submit="search" class="lg:max-w-[50vw] md:max-w-[70vw]"></SearchBar>
   </div>
 </template>
 

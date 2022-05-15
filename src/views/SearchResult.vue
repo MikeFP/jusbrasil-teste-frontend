@@ -3,6 +3,7 @@ import type Processo from "@/classes/processo";
 import { ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import { processo as mock } from "../classes/mocks";
+import { RouterLink } from "vue-router";
 import { apiStore } from "../stores/api";
 
 const props = defineProps<{
@@ -19,9 +20,13 @@ const processo = ref<Processo | null>(mock);
 
 <template>
   <div>
-    <div class="flex bg-sky-800 px-6 py-4">
+    <div class="grid grid-cols-[1fr_auto_1fr] bg-zinc-800 px-6 py-4 gap-4">
+      <RouterLink to="/" class="my-auto flex gap-2 items-center place-self-start p-2">
+        <img src="./../assets/logo.png" alt="Logo Digesto" class="w-8 h-8" />
+        <span class="text-red-300 text-lg tracking-wider">DIGESTO</span>
+      </RouterLink>
       <div class="mx-auto flex flex-col gap-2">
-        <h6 class="text-white">Pesquisar processo por CNJ:</h6>
+        <h6 class="text-red-200">Pesquisar processo por CNJ:</h6>
         <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]"></SearchBar>
       </div>
     </div>
