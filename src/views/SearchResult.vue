@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type Processo from "@/classes/processo";
-import { computed, ref } from "vue";
+import { computed, defineComponent, ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import Chip from "../components/Chip.vue";
 import { processo as mock } from "../classes/mocks";
@@ -15,9 +15,12 @@ const props = defineProps<{
 const cnj = ref(props.cnj);
 const processo = ref<Processo | null>(mock);
 
-// apiStore.search(cnj.value).then((res) => {
-//   list.value = res;
-// });
+apiStore
+  .search(cnj.value)
+  .then((res) => {
+    processo.value = res;
+  })
+  .catch((err) => {});
 
 const estadoProcesso = computed(() => {
   const p = processo.value;
@@ -32,7 +35,7 @@ const estadoProcesso = computed(() => {
 
 const classForEstado = computed(() => {
   const estado = estadoProcesso.value;
-  let className = "";
+  let className = "font-semibold";
   if (estado == "Arquivado") {
     className = "border-none bg-orange-400 text-white";
   } else if (estado == "Extinto") {
@@ -84,12 +87,11 @@ function capitalize(value: string) {
         <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]"></SearchBar>
       </div>
     </div>
-    <div class="p-6 max-w-[1024px] mx-auto">
+    <div class="p-6 max-w-[1024px] mx-auto mb-20">
       <h2>
         Processo {{ processo.area }} <span class="text-gray-500">{{ processo.numero }}</span>
       </h2>
-      <hr class="border-t-gray-300" />
-      <div class="mt-2 flex gap-2 items-center">
+      <div class="mb-3 flex gap-2 items-center">
         <Chip :class="classForEstado">{{ estadoProcesso }}</Chip>
 
         <span class="text-sm text-gray-600">
@@ -97,6 +99,7 @@ function capitalize(value: string) {
           {{ anexosText }}
         </span>
       </div>
+      <hr class="border-t-gray-300" />
 
       <div class="props mt-6">
         <div><span>Última atualização:</span>{{ ultimaAtualizacao }}</div>
@@ -151,6 +154,34 @@ function capitalize(value: string) {
           <span>Tribunal {{ processo.tribunal }}</span>
         </div>
       </div>
+
+      <button class="text-blue-800 mt-4 hover:underline">Ver mais detalhes...</button>
+
+      <div class="section">
+        <h4>Processos Relacionados</h4>
+        <hr />
+        <div class="section-list" v-for="relacionado in processo.processosRelacionados">
+          <div class="title">Tribunal {{ relacionado.tribunal }} - {{ relacionado.natureza }}</div>
+          <div class="subtitle">
+            {{ Intl.DateTimeFormat("pt-BR").format(relacionado.distribuicao_data) }} ·
+            {{ relacionado.numero }}
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h4>Audiências</h4>
+        <hr />
+        <div class="section-list" v-for="audiencia in processo.audiencias">
+          <div class="title">{{ audiencia.tipo }} - {{ audiencia.local }}</div>
+          <div class="subtitle">
+            <Chip :dense="true" class="bg-red-400 border-none text-white font-semibold">{{
+              audiencia.situacao
+            }}</Chip>
+            {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -178,5 +209,25 @@ function capitalize(value: string) {
 
 .icon-label > :first-child {
   @apply w-4 h-4 text-zinc-500;
+}
+
+.section {
+  @apply mt-10;
+}
+
+.section > hr {
+  @apply mb-1;
+}
+
+.section-list {
+  @apply flex flex-col py-1.5;
+}
+
+.section-list > .title {
+  @apply text-lg text-gray-800;
+}
+
+.section-list > .subtitle {
+  @apply text-sm text-gray-500;
 }
 </style>

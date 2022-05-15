@@ -22,23 +22,23 @@ export type ParteProcessoTuple = [
 
 export default class ParteProcesso {
   constructor(
-    id: number,
-    idParticipacao: number,
-    nome: string,
-    nomeNormalizado: string,
-    parteRelacaoId: number,
-    relacaoNormalizado: string,
-    advogados: Advogado[],
-    autora: boolean,
-    coautora: boolean,
-    re: boolean,
-    neutra: boolean,
-    fisica: boolean,
-    cnpj?: number,
-    cpf?: number,
-    documento?: string,
-    cep?: number,
-    idMonitorada?: string
+    public id: number,
+    public idParticipacao: number,
+    public nome: string,
+    public nomeNormalizado: string,
+    public parteRelacaoId: number,
+    public relacaoNormalizado: string,
+    public advogados: Advogado[],
+    public autora: boolean,
+    public coautora: boolean,
+    public re: boolean,
+    public neutra: boolean,
+    public fisica: boolean,
+    public cnpj?: number,
+    public cpf?: number,
+    public documento?: string,
+    public cep?: number,
+    public idMonitorada?: string
   ) {}
 
   static parseTuple(tuple: ParteProcessoTuple) {

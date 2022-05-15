@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { watch } from "vue";
 import { RouterView, useRoute } from "vue-router";
+import { apiStore } from "./stores/api";
 
 const route = useRoute();
 const DEFAULT_TITLE = "Digesto";
+
+apiStore.authenticate();
 
 watch(
   () => route.meta,

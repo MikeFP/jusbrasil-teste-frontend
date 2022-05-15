@@ -10,6 +10,18 @@ h2 {
   @apply text-4xl leading-[1.75em];
 }
 
+h3 {
+  @apply text-3xl leading-[1.75em];
+}
+
+h4 {
+  @apply text-2xl leading-[1.75em] text-gray-700;
+}
+
+h5 {
+  @apply text-xl;
+}
+
 body {
   @apply bg-gray-50;
 }

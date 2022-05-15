@@ -1,7 +1,7 @@
 export type TipoAndamentoTuple = [number, number];
 
 export default class TipoAndamento {
-  constructor(tipo: string, subtipo?: string) {}
+  constructor(public tipo: string, public subtipo?: string) {}
 
   static parseTuple(tuple: [number, number]) {
     const key = `(${tuple[0]}, ${tuple[1]})`;

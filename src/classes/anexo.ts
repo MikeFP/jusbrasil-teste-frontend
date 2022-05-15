@@ -1,13 +1,13 @@
 export default class Anexo {
   constructor(
-    id: number,
-    urlDownload: string,
-    tipo: TipoAnexo,
-    dataPublicacao: Date,
-    dataObtencao: Date,
-    conteudo?: string,
-    idMovimentacao?: number,
-    titulo?: string
+    public id: number,
+    public urlDownload: string,
+    public tipo: TipoAnexo,
+    public dataPublicacao: Date,
+    public dataObtencao: Date,
+    public conteudo?: string,
+    public idMovimentacao?: number,
+    public titulo?: string
   ) {}
 
   static parseTuple(tuple: any[]) {

@@ -427,7 +427,14 @@
     "area": "Trabalhista",
     "assuntoExtra": "Horas Extras,Sobreaviso / Prontid\u00e3o / Tempo \u00e0 Disposi\u00e7\u00e3o,Dura\u00e7\u00e3o do Trabalho,DIREITO DO TRABALHO",
     "liminar": true,
-    "audiencias": [],
+    "audiencias": [
+        [
+            "2022-02-15T16:10:18Z",
+            "Ministério da Fazenda de Manaus",
+            "Disciplinar",
+            "Bem-sucedida"
+        ]
+    ],
     "vara_original": "22",
     "extinto": 0,
     "gratuita": true,
@@ -580,7 +587,24 @@
     "situacao_situacaoID": null,
     "sentencaData": null,
     "instancia": 1,
-    "processosRelacionados": [],
+    "processosRelacionados": [
+        {
+            "id": 1213123,
+            "numero": "75378192903",
+            "distribuicao_data": "2022-04-12T04:24:34",
+            "codigo_identificador": "75378192903",
+            "natureza": "CUMSEN",
+            "tribunal": "TRT9"
+        },
+        {
+            "id": 1213123,
+            "numero": "75378192903",
+            "distribuicao_data": "2022-04-12T04:24:34",
+            "codigo_identificador": "75378192903",
+            "natureza": "CUMSEN",
+            "tribunal": "TRT9"
+        }
+    ],
     "numero": "0000106-58.2022.5.09.0084",
     "customs": [],
     "flag": 1,
