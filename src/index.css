@@ -38,3 +38,20 @@ h6 + hr {
 ul > li::before {
   content: "- ";
 }
+
+.modal {
+  width: 500px;
+  @apply p-8 bg-white rounded-sm;
+}
+
+.vue-universal-modal {
+  @apply hover:cursor-pointer;
+}
+
+.vue-universal-modal .modal {
+  @apply hover:cursor-auto;
+}
+
+.separate-comma > *:not(:last-child)::after {
+  content: ",";
+}

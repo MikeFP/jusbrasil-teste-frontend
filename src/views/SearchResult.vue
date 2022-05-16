@@ -9,6 +9,7 @@ import { RouterLink } from "vue-router";
 import { apiStore } from "../stores/api";
 import NaturezaDg from "@/classes/naturezaDg";
 import Instancia from "@/classes/instancia";
+import ParteModal from "@/modals/ParteModal.vue";
 
 const props = defineProps<{
   cnj: string;
@@ -37,7 +38,7 @@ const estadoProcesso = computed(() => {
 
 const classForEstado = computed(() => {
   const estado = estadoProcesso.value;
-  let className = "font-semibold ";
+  let className = "font-semibold capitalize ";
   if (estado == "Extinto") {
     className += "border-transparent bg-zinc-700 text-white";
   } else if (estado != "Arquivado") {
@@ -58,10 +59,6 @@ const anexosText = computed(() => {
     }
   }
   return res;
-});
-
-const ultimaAtualizacao = computed(() => {
-  return processo.value.alteradoEm;
 });
 
 const natureza = computed(() => {
@@ -86,6 +83,7 @@ function useToggle() {
 }
 
 const otherInfoToggle = useToggle();
+const parteModal = ref<typeof ParteModal | null>(null);
 </script>
 
 <template>
@@ -117,26 +115,20 @@ const otherInfoToggle = useToggle();
       <div class="props mt-6">
         <div>
           <span>Última atualização:</span
-          >{{ Intl.DateTimeFormat("pt-BR").format(ultimaAtualizacao) }}
+          >{{ Intl.DateTimeFormat("pt-BR").format(processo.alteradoEm) }}
         </div>
         <div class="gap-1">
           <span>Características:</span>
-          <Chip
-            v-if="processo.liminar"
-            :dense="true"
-            class="bg-blue-500 border-0 font-semibold text-gray-100"
+          <Chip v-if="processo.liminar" :dense="true" class="bg-blue-500 border-0 text-gray-100"
             >liminar</Chip
           >
           <Chip
             v-if="processo.segredo_justica"
             :dense="true"
-            class="bg-gray-900 border-0 font-semibold text-gray-100"
+            class="bg-gray-900 border-0 text-gray-100"
             >segredo</Chip
           >
-          <Chip
-            v-if="processo.gratuita"
-            :dense="true"
-            class="bg-green-500 border-0 font-semibold text-black"
+          <Chip v-if="processo.gratuita" :dense="true" class="bg-green-500 border-0 text-black"
             >gratuita</Chip
           >
 
@@ -191,6 +183,40 @@ const otherInfoToggle = useToggle();
       </div>
 
       <div class="section">
+        <h3>Partes</h3>
+        <hr />
+        <div class="section-list" v-for="parte in processo.partes">
+          <div
+            class="flex gap-2 items-center group hover:cursor-pointer"
+            @click="parteModal.open({ parte })"
+          >
+            <Chip :dense="true" class="bg-red-500 text-gray-100">
+              {{ parte.descricaoPapel }}
+            </Chip>
+            <div class="title group-hover:underline">{{ parte.nome }}</div>
+          </div>
+
+          <IconLabel
+            v-if="(parte.advogados?.length || 0) > 0"
+            icon="user-tie"
+            class="text-gray-700 capitalize mt-1 mb-1"
+          >
+            <div class="flex separate-comma gap-1">
+              <span
+                v-for="advogado in parte.advogados"
+                class="hover:cursor-pointer hover:underline"
+                @click.prevent="parteModal.open({ advogado })"
+              >
+                {{ advogado.nome.toLowerCase() }}
+              </span>
+            </div>
+          </IconLabel>
+        </div>
+
+        <ParteModal ref="parteModal" />
+      </div>
+
+      <div class="section">
         <h3>Processos Relacionados</h3>
         <hr />
         <p v-if="(processo.processosRelacionados?.length || 0) == 0">Nenhum</p>
@@ -213,7 +239,7 @@ const otherInfoToggle = useToggle();
             <Chip
               v-if="audiencia.situacao"
               :dense="true"
-              class="bg-red-400 border-none text-white font-semibold lowercase"
+              class="bg-red-500 border-none text-gray-100"
               >{{ audiencia.situacao }}</Chip
             >
             {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
@@ -222,22 +248,26 @@ const otherInfoToggle = useToggle();
       </div>
 
       <div class="section">
-        <h3>Partes</h3>
+        <h3>Movimentações</h3>
         <hr />
-        <div class="section-list" v-for="parte in processo.partes">
-          <div class="title">{{ parte.nome }}</div>
-          <div class="text-sm font-semibold text-gray-400 mb-1">
-            {{ parte.relacaoNormalizado }}
+        <div class="section-list" v-for="mov in processo.movs">
+          <div class="title">{{ mov.tipo || "Sem título" }}</div>
+          <div class="subtitle">
+            {{ Intl.DateTimeFormat("pt-BR").format(mov.data) }}
           </div>
-
-          <IconLabel
-            v-if="(parte.advogados?.length || 0) > 0"
-            icon="user-tie"
-            class="text-gray-700 capitalize mt-1 mb-1"
-          >
-            {{ parte.advogados.map((a) => a.nome.toLowerCase()).join(", ") }}
-          </IconLabel>
-          <hr class="mt-1" />
+          <div class="flex gap-2 my-2">
+            <Chip
+              :dense="true"
+              v-for="tipoNormal in mov.tiposNormalizados"
+              class="bg-gray-200 border-transparent text-gray-600 mr-1"
+            >
+              {{ tipoNormal.tipo }}</Chip
+            >
+          </div>
+          <p class="my-3">
+            {{ mov.texto }}
+          </p>
+          <hr />
         </div>
       </div>
 
@@ -256,38 +286,12 @@ const otherInfoToggle = useToggle();
         <div class="section-list" v-for="anexo in processo.anexos">
           <div class="title">{{ anexo.titulo || "Sem título" }}</div>
           <div class="subtitle">
-            <Chip
-              :dense="true"
-              class="bg-gray-200 border-transparent text-gray-600 font-semibold lowercase mr-1"
-              >{{ anexo.descricaoTipo }}</Chip
-            >
+            <Chip :dense="true" class="bg-gray-200 border-transparent text-gray-600 mr-1">{{
+              anexo.descricaoTipo
+            }}</Chip>
             {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataPublicacao) }} · obtido em
             {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataObtencao) }}
           </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Movimentações</h3>
-        <hr />
-        <div class="section-list" v-for="mov in processo.movs">
-          <div class="title">{{ mov.tipo || "Sem título" }}</div>
-          <div class="subtitle">
-            {{ Intl.DateTimeFormat("pt-BR").format(mov.data) }}
-          </div>
-          <div class="flex gap-2 my-2">
-            <Chip
-              :dense="true"
-              v-for="tipoNormal in mov.tiposNormalizados"
-              class="bg-gray-200 border-transparent text-gray-600 font-semibold lowercase mr-1"
-            >
-              {{ tipoNormal.tipo }}</Chip
-            >
-          </div>
-          <p class="my-3">
-            {{ mov.texto }}
-          </p>
-          <hr />
         </div>
       </div>
     </div>
@@ -303,7 +307,7 @@ const otherInfoToggle = useToggle();
   @apply flex text-gray-700;
 }
 
-.props > * > span {
+.props > * > span:first-child {
   @apply label;
 }
 
@@ -323,11 +327,11 @@ const otherInfoToggle = useToggle();
   @apply flex flex-col py-1.5;
 }
 
-.section-list > .title {
+.section-list .title {
   @apply text-lg text-gray-800;
 }
 
-.section-list > .subtitle {
+.section-list .subtitle {
   @apply text-sm text-gray-500;
 }
 </style>

@@ -41,6 +41,17 @@ export default class ParteProcesso {
     public idMonitorada?: string
   ) {}
 
+  get descricaoPapel() {
+    if (this.autora) {
+      return "Autora";
+    } else if (this.coautora) {
+      return "Co-autora";
+    } else if (this.re) {
+      return "Ré";
+    }
+    return "Parte";
+  }
+
   static parseTuple(tuple: ParteProcessoTuple) {
     const [
       id,

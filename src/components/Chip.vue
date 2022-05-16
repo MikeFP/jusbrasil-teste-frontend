@@ -6,7 +6,7 @@ const { dense = false } = defineProps<{
 
 <template>
   <div
-    class="border-gray-400 border py-1 px-4 inline-flex items-center rounded-full"
+    class="border-gray-400 font-semibold lowercase border py-1 px-4 inline-flex items-center rounded-full"
     :class="dense ? 'px-2 py-0 text-sm rounded-md' : ''"
   >
     <slot />
