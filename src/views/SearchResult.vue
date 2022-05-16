@@ -90,21 +90,25 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
 
 <template>
   <div>
-    <div class="grid grid-cols-[1fr_auto_1fr] bg-zinc-800 px-6 py-4 gap-4">
-      <RouterLink to="/" class="my-auto flex gap-2 items-center place-self-start p-2">
+    <div
+      class="flex flex-col md:grid grid-cols-[1fr_auto_1fr] bg-zinc-800 px-6 pt-2 pb-3 md:py-4 md:gap-4"
+    >
+      <RouterLink to="/" class="m-auto flex gap-2 items-center place-self-start p-2">
         <img src="./../assets/logo.png" alt="Logo Digesto" class="w-8 h-8" />
         <span class="text-red-200 text-lg tracking-wider">DIGESTO</span>
       </RouterLink>
-      <div class="mx-auto flex flex-col gap-2">
+      <div class="sm:mx-10 md:mx-auto flex flex-col gap-2">
         <h6 class="text-red-200">Pesquisar processo por CNJ:</h6>
         <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]"></SearchBar>
       </div>
     </div>
-    <div class="p-6 max-w-[1024px] mx-auto mb-20">
-      <h2>
-        Processo {{ processo.area }} <span class="text-gray-500">{{ processo.numero }}</span>
+
+    <div class="p-4 sm:p-6 max-w-[1024px] mx-auto mb-20">
+      <h2 class="text-2xl sm:text-4xl sm:mt-4 flex align-baseline gap-x-3 flex-wrap">
+        <span>Processo {{ processo.area }}</span>
+        <span class="text-gray-500 break-words max-w-full">{{ processo.numero }}</span>
       </h2>
-      <div class="mb-3 flex gap-2 items-center">
+      <div class="mb-3 flex gap-2 items-center flex-wrap">
         <Chip :class="classForEstado">{{ estadoProcesso }}</Chip>
 
         <span class="text-sm text-gray-600">
@@ -189,7 +193,7 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         <hr />
         <div class="section-list" v-for="parte in processo.partes">
           <div
-            class="flex gap-2 items-center group hover:cursor-pointer"
+            class="flex gap-2 items-baseline group hover:cursor-pointer flex-wrap"
             @click="parteModal.open({ parte })"
           >
             <Chip :dense="true" class="bg-red-500 text-gray-100">
@@ -201,9 +205,9 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
           <IconLabel
             v-if="(parte.advogados?.length || 0) > 0"
             icon="user-tie"
-            class="text-gray-700 capitalize mt-1 mb-1"
+            class="text-gray-700 capitalize mt-1 mb-1 items-baseline"
           >
-            <div class="flex separate-comma gap-1">
+            <div class="flex separate-comma gap-x-1 flex-wrap">
               <span
                 v-for="advogado in parte.advogados"
                 class="hover:cursor-pointer hover:underline"
@@ -257,7 +261,7 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
           <div class="subtitle">
             {{ Intl.DateTimeFormat("pt-BR").format(mov.data) }}
           </div>
-          <div class="flex gap-2 my-2">
+          <div class="flex gap-2 my-2 flex-wrap">
             <Chip
               :dense="true"
               v-for="tipoNormal in mov.tiposNormalizados"
@@ -302,8 +306,10 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
             <Chip :dense="true" class="bg-gray-200 border-transparent text-gray-600 mr-1">{{
               anexo.descricaoTipo
             }}</Chip>
-            {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataPublicacao) }} · obtido em
-            {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataObtencao) }}
+            <div class="flex">
+              {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataPublicacao) }} · obtido em
+              {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataObtencao) }}
+            </div>
           </div>
         </div>
 
@@ -319,7 +325,7 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
 }
 
 .props > * {
-  @apply flex text-gray-700;
+  @apply flex text-gray-700 flex-wrap;
 }
 
 .props > * > span:first-child {
@@ -347,6 +353,6 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
 }
 
 .section-list .subtitle {
-  @apply text-sm text-gray-500;
+  @apply text-sm text-gray-500 flex items-start flex-wrap gap-y-1;
 }
 </style>
