@@ -1,4 +1,4 @@
-const reISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d)*)(?:Z|(\+|-)([\d|:]*))?$/;
+const reISO = /^(\d{4})-(\d{2})-(\d{2})(T(\d{2}):(\d{2}):(\d{2}(?:\.\d)*)(?:Z|(\+|-)([\d|:]*))?)*$/;
 const reMsAjax = /^\/Date\((d|-|.*)\)[\/|\\]$/;
 
 export default function dateReviver(key: string, value: any) {

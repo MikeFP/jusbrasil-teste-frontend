@@ -2,19 +2,23 @@
 import { ref } from "vue";
 
 const input = ref<HTMLInputElement | null>(null);
+const { modelValue, dense = false } = defineProps<{
+  modelValue: string;
+  dense?: boolean;
+}>();
+const emit = defineEmits(["update:modelValue", "submit"]);
+defineExpose({
+  focus,
+});
 
 function focus() {
   input?.value?.focus();
 }
 
-const { modelValue, dense = false } = defineProps<{
-  modelValue: string;
-  dense?: boolean;
-}>();
-defineEmits(["update:modelValue", "submit"]);
-defineExpose({
-  focus,
-});
+function submit() {
+  input?.value?.blur();
+  emit("submit");
+}
 </script>
 
 <template>
@@ -27,7 +31,7 @@ defineExpose({
     placeholder="CNJ do processo"
     :value="modelValue"
     @input="$emit('update:modelValue', ($event?.target as HTMLInputElement).value)"
-    @keypress.enter="$emit('submit')"
+    @keypress.enter="submit"
   />
 </template>
 

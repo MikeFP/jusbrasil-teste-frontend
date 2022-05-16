@@ -1,30 +1,57 @@
 <script setup lang="ts">
 import type Processo from "@/classes/processo";
-import { computed, defineComponent, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import Chip from "../components/Chip.vue";
 import IconLabel from "../components/IconLabel.vue";
 import { processo as mock } from "../classes/mocks";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { apiStore } from "../stores/api";
 import NaturezaDg from "@/classes/naturezaDg";
 import Instancia from "@/classes/instancia";
 import ParteModal from "@/modals/ParteModal.vue";
 import AnexoModal from "@/modals/AnexoModal.vue";
+import useToggle from "@/utils/use-toggle";
+import capitalize from "@/utils/capitalize";
+import Spinner from "@/icons/Spinner.vue";
 
+const router = useRouter();
 const props = defineProps<{
   cnj: string;
 }>();
 
 const cnj = ref(props.cnj);
-const processo = ref<Processo | null>(mock);
+const searchQuery = ref(props.cnj);
+const processo = ref<Processo | null>(null);
+const isLoading = ref(true);
 
-apiStore
-  .search(cnj.value)
-  .then((res) => {
-    processo.value = res;
-  })
-  .catch((err) => {});
+function fetch() {
+  processo.value = null;
+  isLoading.value = true;
+  apiStore.cancelRequests();
+  apiStore
+    .search(cnj.value)
+    .then((res) => {
+      processo.value = res;
+      isLoading.value = false;
+    })
+    .catch((err) => {
+      if (!err.code || err.code != "ERR_CANCELED") {
+        processo.value = mock;
+        isLoading.value = false;
+      }
+    });
+}
+
+function search() {
+  if (cnj.value && cnj.value != "") {
+    searchQuery.value = cnj.value;
+    router.push("/search/" + cnj.value);
+    fetch();
+  }
+}
+
+fetch();
 
 const estadoProcesso = computed(() => {
   const p = processo.value;
@@ -66,24 +93,8 @@ const natureza = computed(() => {
   return NaturezaDg.getDescricao(processo.value.classeNatureza_dg);
 });
 
-function capitalize(value: string) {
-  let res = value.toLowerCase();
-  res = res[0].toUpperCase() + res.substring(1);
-  return res;
-}
-
-function useToggle() {
-  const isToggled = ref(false);
-  function toggle() {
-    isToggled.value = !isToggled.value;
-  }
-  return reactive({
-    isToggled,
-    toggle,
-  });
-}
-
 const otherInfoToggle = useToggle();
+const movsListToggle = useToggle();
 const parteModal = ref<typeof ParteModal | null>(null);
 const anexoModal = ref<typeof AnexoModal | null>(null);
 </script>
@@ -93,17 +104,20 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
     <div
       class="flex flex-col md:grid grid-cols-[1fr_auto_1fr] bg-zinc-800 px-6 pt-2 pb-3 md:py-4 md:gap-4"
     >
-      <RouterLink to="/" class="m-auto flex gap-2 items-center place-self-start p-2">
+      <RouterLink
+        to="/"
+        class="m-auto md:my-auto md:mx-0 flex gap-2 items-center place-self-start p-2"
+      >
         <img src="./../assets/logo.png" alt="Logo Digesto" class="w-8 h-8" />
         <span class="text-red-200 text-lg tracking-wider">DIGESTO</span>
       </RouterLink>
       <div class="sm:mx-10 md:mx-auto flex flex-col gap-2">
         <h6 class="text-red-200">Pesquisar processo por CNJ:</h6>
-        <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]"></SearchBar>
+        <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]" @submit="search"></SearchBar>
       </div>
     </div>
 
-    <div class="p-4 sm:p-6 max-w-[1024px] mx-auto mb-20">
+    <div class="p-4 sm:p-6 max-w-[1024px] mx-auto mb-20" v-if="processo">
       <h2 class="text-2xl sm:text-4xl sm:mt-4 flex align-baseline gap-x-3 flex-wrap">
         <span>Processo {{ processo.area }}</span>
         <span class="text-gray-500 break-words max-w-full">{{ processo.numero }}</span>
@@ -175,6 +189,10 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
 
         <div class="props mt-2">
           <div><span>Instância: </span> {{ Instancia.getDescricao(processo.instancia) }}</div>
+          <div>
+            <span>Distribuição: </span> {{ processo.distribuicaoTipo }}, em
+            {{ Intl.DateTimeFormat("pt-BR").format(processo.distribuicaoData) }}
+          </div>
           <div><span>Sistema fonte: </span> {{ processo.fonte_sistema }}</div>
           <div><span>Identificador original: </span> {{ processo.numeroAlternativo }}</div>
           <ul class="flex-col">
@@ -256,7 +274,10 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
       <div class="section">
         <h3>Movimentações</h3>
         <hr />
-        <div class="section-list" v-for="mov in processo.movs">
+        <div
+          class="section-list"
+          v-for="mov in movsListToggle.isToggled ? processo.movs : processo.movs.slice(0, 3)"
+        >
           <div class="title">{{ mov.tipo || "Sem título" }}</div>
           <div class="subtitle">
             {{ Intl.DateTimeFormat("pt-BR").format(mov.data) }}
@@ -274,6 +295,14 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
             {{ mov.texto }}
           </p>
           <hr />
+        </div>
+        <div
+          v-if="(processo.movs?.length || 0) > 3"
+          class="flex justify-center text-blue-800 hover:underline hover:cursor-pointer"
+          @click="movsListToggle.toggle"
+        >
+          <span v-if="movsListToggle.isToggled">Ocultar movimentações</span>
+          <span v-else>Ver mais {{ processo.movs.length - 3 }} movimentações</span>
         </div>
       </div>
 
@@ -300,7 +329,7 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
             <Chip
               v-if="anexo.conteudo"
               :dense="true"
-              class="bg-green-200 border-transparent text-gray-800 mr-2"
+              class="bg-green-200 border-transparent text-gray-800 mr-1"
               >prévia</Chip
             >
             <Chip :dense="true" class="bg-gray-200 border-transparent text-gray-600 mr-1">{{
@@ -314,6 +343,13 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         </div>
 
         <AnexoModal ref="anexoModal" />
+      </div>
+    </div>
+
+    <div v-if="isLoading" class="flex h-full m-8">
+      <div class="m-auto flex flex-col items-center gap-2">
+        Pesquisando por {{ searchQuery }}
+        <Spinner class="text-red-700 animate-spin w-8 h-8" />
       </div>
     </div>
   </div>
@@ -353,6 +389,6 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
 }
 
 .section-list .subtitle {
-  @apply text-sm text-gray-500 flex items-start flex-wrap gap-y-1;
+  @apply text-sm text-gray-500 flex items-start flex-wrap gap-1;
 }
 </style>
