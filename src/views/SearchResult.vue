@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type Processo from "@/classes/processo";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import Chip from "../components/Chip.vue";
 import IconLabel from "../components/IconLabel.vue";
 import { processo as mock } from "../classes/mocks";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { apiStore } from "../stores/api";
 import NaturezaDg from "@/classes/naturezaDg";
 import Instancia from "@/classes/instancia";
@@ -14,16 +14,29 @@ import AnexoModal from "@/modals/AnexoModal.vue";
 import useToggle from "@/utils/use-toggle";
 import capitalize from "@/utils/capitalize";
 import Spinner from "@/icons/Spinner.vue";
+import { isValidCnj, cnjMask } from "@/utils/validators";
 
 const router = useRouter();
+const route = useRoute();
 const props = defineProps<{
   cnj: string;
 }>();
 
+const input = ref<typeof SearchBar | null>();
 const cnj = ref(props.cnj);
 const searchQuery = ref(props.cnj);
 const processo = ref<Processo | null>(null);
 const isLoading = ref(true);
+const errorMessage = ref<string | null>(null);
+
+watch(
+  () => route.name,
+  (routeName) => {
+    if (routeName !== "search") {
+      apiStore.cancelRequests();
+    }
+  }
+);
 
 function fetch() {
   processo.value = null;
@@ -43,15 +56,30 @@ function fetch() {
     });
 }
 
+function validate() {
+  const validation = isValidCnj(cnj.value);
+  if (validation === true) {
+    errorMessage.value = null;
+    return validation;
+  }
+  errorMessage.value = validation;
+  return false;
+}
+
 function search() {
-  if (cnj.value && cnj.value != "") {
+  if (validate()) {
+    input?.value?.blur();
     searchQuery.value = cnj.value;
     router.push("/search/" + cnj.value);
     fetch();
   }
 }
 
-fetch();
+if (validate()) {
+  fetch();
+} else {
+  router.replace("/");
+}
 
 const estadoProcesso = computed(() => {
   const p = processo.value;
@@ -111,9 +139,21 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         <img src="./../assets/logo.png" alt="Logo Digesto" class="w-8 h-8" />
         <span class="text-red-200 text-lg tracking-wider">DIGESTO</span>
       </RouterLink>
-      <div class="sm:mx-10 md:mx-auto flex flex-col gap-2">
-        <h6 class="text-red-200">Pesquisar processo por CNJ:</h6>
-        <SearchBar v-model="cnj" :dense="true" class="min-w-[50vw]" @submit="search"></SearchBar>
+      <div class="sm:mx-10 md:mx-auto flex flex-col gap-2 relative">
+        <div class="flex flex-col md:flex-row flex-wrap">
+          <h6 class="text-red-200">Pesquisar processo por CNJ:</h6>
+          <span v-if="errorMessage" class="md:ml-auto text-yellow-400"
+            ><font-awesome-icon icon="circle-exclamation" class="mr-2" />{{ errorMessage }}</span
+          >
+        </div>
+        <SearchBar
+          ref="input"
+          :mask="cnjMask"
+          v-model="cnj"
+          :dense="true"
+          class="min-w-[50vw]"
+          @submit="search"
+        ></SearchBar>
       </div>
     </div>
 
