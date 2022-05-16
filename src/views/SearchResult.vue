@@ -52,6 +52,8 @@ function fetch() {
       if (!err.code || err.code != "ERR_CANCELED") {
         processo.value = mock;
         isLoading.value = false;
+      } else {
+        console.error(err);
       }
     });
 }

@@ -15,7 +15,9 @@ export const apiStore = reactive({
       withCredentials: true,
       params: {
         tipo_numero: "8",
-        api_key: "5af8ba4c-43e3-4361-9e9c-f73458ab6a5b",
+      },
+      headers: {
+        Authorization: "Bearer " + import.meta.env.VITE_API_KEY,
       },
       signal: ctrl.signal,
     });
@@ -28,8 +30,8 @@ export const apiStore = reactive({
     const res = await axios.post(
       "/user/login",
       {
-        "credentials.username": "teste.frontend@digesto.com.br",
-        "credentials.password": "12345678",
+        "credentials.username": import.meta.env.VITE_API_USERNAME,
+        "credentials.password": import.meta.env.VITE_API_PASSWORD,
       },
       {
         withCredentials: true,
@@ -44,5 +46,6 @@ export const apiStore = reactive({
 
   cancelRequests() {
     this.controllers.forEach((ctrl) => ctrl.abort());
+    this.controllers = [];
   },
 });

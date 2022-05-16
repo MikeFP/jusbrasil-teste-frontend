@@ -14,6 +14,18 @@ Acesse a pasta raiz do projeto no terminal e rode o comando:
 npm install
 ```
 
+## Credenciais da API
+
+Para habilitar o acesso à API da Digesto, você precisa criar um arquivo nomeado `.env.local` na pasta raiz do projeto, com o seguinte conteúdo:
+
+```
+VITE_API_USERNAME=<nome de usuário da api digesto>
+VITE_API_PASSWORD=<senha da api digesto>
+VITE_API_KEY=<chave para api digesto>
+```
+
+O conteúdo do arquivo deve possuir as suas credenciais de acesso à API da Digesto, nos lugares indicados entre `<>`. Para obter as credenciais, [cadastre-se no site da Digesto](https://op.digesto.com.br/user/login) e acesse esta [página que contém sua chave da API](https://op.digesto.com.br/#/companyadmin/api).
+
 ## Servir website localmente
 
 Para rodar o projeto em um servidor local, use:
