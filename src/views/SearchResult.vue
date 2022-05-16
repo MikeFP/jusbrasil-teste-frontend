@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type Processo from "@/classes/processo";
-import { computed, defineComponent, ref } from "vue";
+import { computed, defineComponent, reactive, ref } from "vue";
 import SearchBar from "../components/SearchBar.vue";
 import Chip from "../components/Chip.vue";
 import IconLabel from "../components/IconLabel.vue";
@@ -8,6 +8,7 @@ import { processo as mock } from "../classes/mocks";
 import { RouterLink } from "vue-router";
 import { apiStore } from "../stores/api";
 import NaturezaDg from "@/classes/naturezaDg";
+import Instancia from "@/classes/instancia";
 
 const props = defineProps<{
   cnj: string;
@@ -36,13 +37,11 @@ const estadoProcesso = computed(() => {
 
 const classForEstado = computed(() => {
   const estado = estadoProcesso.value;
-  let className = "font-semibold";
-  if (estado == "Arquivado") {
-    className = "border-transparent bg-orange-400 text-white";
-  } else if (estado == "Extinto") {
-    className = "border-transparent bg-zinc-700 text-white";
-  } else if (estado != "Ativo") {
-    className = "border-green-300 bg-green-200";
+  let className = "font-semibold ";
+  if (estado == "Extinto") {
+    className += "border-transparent bg-zinc-700 text-white";
+  } else if (estado != "Arquivado") {
+    className += "border-green-300 bg-green-200";
   }
   return className;
 });
@@ -74,6 +73,19 @@ function capitalize(value: string) {
   res = res[0].toUpperCase() + res.substring(1);
   return res;
 }
+
+function useToggle() {
+  const isToggled = ref(false);
+  function toggle() {
+    isToggled.value = !isToggled.value;
+  }
+  return reactive({
+    isToggled,
+    toggle,
+  });
+}
+
+const otherInfoToggle = useToggle();
 </script>
 
 <template>
@@ -103,7 +115,10 @@ function capitalize(value: string) {
       <hr class="border-t-gray-300" />
 
       <div class="props mt-6">
-        <div><span>Última atualização:</span>{{ ultimaAtualizacao }}</div>
+        <div>
+          <span>Última atualização:</span
+          >{{ Intl.DateTimeFormat("pt-BR").format(ultimaAtualizacao) }}
+        </div>
         <div class="gap-1">
           <span>Características:</span>
           <Chip
@@ -128,7 +143,7 @@ function capitalize(value: string) {
           <span v-if="!processo.gratuita && !processo.segredo_justica && !processo.liminar">-</span>
         </div>
         <div><span>Natureza:</span>{{ natureza }}</div>
-        <div>
+        <div v-if="processo.valor">
           <span>Valor:</span
           >{{
             Intl.NumberFormat("pt-BR", {
@@ -139,7 +154,9 @@ function capitalize(value: string) {
         </div>
       </div>
 
-      <div class="mt-4 bg-gray-200 px-4 pt-2 pb-3 rounded-lg flex flex-col gap-1">
+      <div
+        class="mt-4 bg-gray-100 border-gray-200 border px-4 pt-2 pb-3 rounded-lg flex flex-col gap-1"
+      >
         <span class="label">Foro:</span>
         {{ processo.foro }} - Vara {{ processo.vara }}
         <IconLabel icon="location-dot" class="mt-2">
@@ -151,11 +168,32 @@ function capitalize(value: string) {
         </IconLabel>
       </div>
 
-      <button class="text-blue-800 mt-4 hover:underline">Ver mais detalhes...</button>
+      <button class="text-blue-800 mt-4 hover:underline" @click="otherInfoToggle.toggle()">
+        Ver {{ otherInfoToggle.isToggled ? "menos" : "mais" }} detalhes...
+      </button>
+
+      <div class="mt-4" v-if="otherInfoToggle.isToggled">
+        <h5>Outras informações</h5>
+
+        <div class="props mt-2">
+          <div><span>Instância: </span> {{ Instancia.getDescricao(processo.instancia) }}</div>
+          <div><span>Sistema fonte: </span> {{ processo.fonte_sistema }}</div>
+          <div><span>Identificador original: </span> {{ processo.numeroAlternativo }}</div>
+          <ul class="flex-col">
+            <span>Classes: </span>
+            <li v-for="classe in processo.classes">{{ classe }}</li>
+          </ul>
+          <ul class="flex-col">
+            <span>Assuntos: </span>
+            <li v-for="assunto in processo.assuntoExtra.split(',')">{{ assunto }}</li>
+          </ul>
+        </div>
+      </div>
 
       <div class="section">
         <h3>Processos Relacionados</h3>
         <hr />
+        <p v-if="(processo.processosRelacionados?.length || 0) == 0">Nenhum</p>
         <div class="section-list" v-for="relacionado in processo.processosRelacionados">
           <div class="title">Tribunal {{ relacionado.tribunal }} - {{ relacionado.natureza }}</div>
           <div class="subtitle">
@@ -168,12 +206,16 @@ function capitalize(value: string) {
       <div class="section">
         <h3>Audiências</h3>
         <hr />
+        <p v-if="(processo.audiencias?.length || 0) == 0">Sem audiências</p>
         <div class="section-list" v-for="audiencia in processo.audiencias">
           <div class="title">{{ audiencia.tipo }} - {{ audiencia.local }}</div>
           <div class="subtitle">
-            <Chip :dense="true" class="bg-red-400 border-none text-white font-semibold lowercase">{{
-              audiencia.situacao
-            }}</Chip>
+            <Chip
+              v-if="audiencia.situacao"
+              :dense="true"
+              class="bg-red-400 border-none text-white font-semibold lowercase"
+              >{{ audiencia.situacao }}</Chip
+            >
             {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
           </div>
         </div>
@@ -200,8 +242,17 @@ function capitalize(value: string) {
       </div>
 
       <div class="section">
-        <h3>Anexos</h3>
+        <div class="flex">
+          <h3 class="leading-[1em] mb-3">Anexos</h3>
+          <div
+            v-if="processo.anexos?.length > 0"
+            class="ml-2 rounded-full bg-red-500 text-white w-5 h-5 text-xs flex items-center justify-center mt-2"
+          >
+            {{ processo.anexos.length }}
+          </div>
+        </div>
         <hr />
+        <p v-if="(processo.anexos?.length || 0) == 0">Sem anexos</p>
         <div class="section-list" v-for="anexo in processo.anexos">
           <div class="title">{{ anexo.titulo || "Sem título" }}</div>
           <div class="subtitle">
@@ -248,16 +299,16 @@ function capitalize(value: string) {
   @apply flex flex-col gap-1;
 }
 
-.props > div {
+.props > * {
   @apply flex text-gray-700;
 }
 
-.props > div > span {
+.props > * > span {
   @apply label;
 }
 
 .label {
-  @apply font-semibold text-gray-600 mr-2;
+  @apply font-semibold text-gray-700 mr-2;
 }
 
 .section {

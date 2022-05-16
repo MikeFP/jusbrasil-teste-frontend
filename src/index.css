@@ -34,3 +34,7 @@ h5 + hr,
 h6 + hr {
   @apply border-t-gray-300;
 }
+
+ul > li::before {
+  content: "- ";
+}
