@@ -10,6 +10,7 @@ import { apiStore } from "../stores/api";
 import NaturezaDg from "@/classes/naturezaDg";
 import Instancia from "@/classes/instancia";
 import ParteModal from "@/modals/ParteModal.vue";
+import AnexoModal from "@/modals/AnexoModal.vue";
 
 const props = defineProps<{
   cnj: string;
@@ -84,6 +85,7 @@ function useToggle() {
 
 const otherInfoToggle = useToggle();
 const parteModal = ref<typeof ParteModal | null>(null);
+const anexoModal = ref<typeof AnexoModal | null>(null);
 </script>
 
 <template>
@@ -136,7 +138,7 @@ const parteModal = ref<typeof ParteModal | null>(null);
         </div>
         <div><span>Natureza:</span>{{ natureza }}</div>
         <div v-if="processo.valor">
-          <span>Valor:</span
+          <span>Valor da causa:</span
           >{{
             Intl.NumberFormat("pt-BR", {
               style: "currency",
@@ -276,16 +278,27 @@ const parteModal = ref<typeof ParteModal | null>(null);
           <h3 class="leading-[1em] mb-3">Anexos</h3>
           <div
             v-if="processo.anexos?.length > 0"
-            class="ml-2 rounded-full bg-red-500 text-white w-5 h-5 text-xs flex items-center justify-center mt-2"
+            class="ml-2 rounded-full bg-gray-200 text-gray-600 font-semibold w-5 h-5 text-xs flex items-center justify-center mt-2"
           >
             {{ processo.anexos.length }}
           </div>
         </div>
         <hr />
         <p v-if="(processo.anexos?.length || 0) == 0">Sem anexos</p>
-        <div class="section-list" v-for="anexo in processo.anexos">
-          <div class="title">{{ anexo.titulo || "Sem título" }}</div>
+        <div
+          class="section-list"
+          :class="anexo.conteudo ? 'group hover:cursor-pointer' : ''"
+          v-for="anexo in processo.anexos"
+          @click="anexo.conteudo ? anexoModal.open(anexo) : null"
+        >
+          <div class="title group-hover:underline">{{ anexo.titulo || "Sem título" }}</div>
           <div class="subtitle">
+            <Chip
+              v-if="anexo.conteudo"
+              :dense="true"
+              class="bg-green-200 border-transparent text-gray-800 mr-2"
+              >prévia</Chip
+            >
             <Chip :dense="true" class="bg-gray-200 border-transparent text-gray-600 mr-1">{{
               anexo.descricaoTipo
             }}</Chip>
@@ -293,6 +306,8 @@ const parteModal = ref<typeof ParteModal | null>(null);
             {{ Intl.DateTimeFormat("pt-BR").format(anexo.dataObtencao) }}
           </div>
         </div>
+
+        <AnexoModal ref="anexoModal" />
       </div>
     </div>
   </div>

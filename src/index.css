@@ -40,8 +40,9 @@ ul > li::before {
 }
 
 .modal {
-  width: 500px;
-  @apply p-8 bg-white rounded-sm;
+  min-width: 95vw;
+  max-height: 95vh;
+  @apply flex flex-col sm:min-w-[90vw] sm:max-h-[90vh] p-4 m-4 md:p-6 md:m-6 bg-white rounded-sm max-w-[75vw] md:min-w-[500px];
 }
 
 .vue-universal-modal {
@@ -54,4 +55,12 @@ ul > li::before {
 
 .separate-comma > *:not(:last-child)::after {
   content: ",";
+}
+
+.btn.btn-primary {
+  @apply bg-red-500 text-white;
+}
+
+.btn {
+  @apply px-3 py-1 rounded-md font-semibold hover:cursor-pointer hover:bg-gray-100 active:bg-gray-200;
 }
