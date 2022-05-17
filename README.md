@@ -2,6 +2,8 @@
 
 Um website SPA (*Single Page Application*) para pesquisar e visualizar as informações de processos jurídicos por CNJ, utilizando a API da Digesto.
 
+*Observação: Por conta de problemas técnicos, a integração total com a API Digesto não foi possível. Atualmente, a aplicação apenas mostra os dados de um processo fixo, independente da pesquisa feita pelo usuário. Ainda sim, o projeto está preparado para se conectar com a API quando os erros de configuração forem resolvidos.*
+
 ## Requisitos
 
 Para construir o projeto, é necessário ter o [Node](https://nodejs.org/en/download/) instalado na máquina, que já inclui o [NPM](https://www.npmjs.com/).

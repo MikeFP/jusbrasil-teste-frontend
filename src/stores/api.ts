@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import axios, { type AxiosResponseHeaders } from "axios";
+import axios from "axios";
 import type Processo from "@/classes/processo";
 
 export const apiStore = reactive({
@@ -8,11 +8,16 @@ export const apiStore = reactive({
   async search(cnj: string): Promise<Processo> {
     const ctrl = new AbortController();
     this.controllers.push(ctrl);
+
+    // Apparently, further requests only work if user was logged in previously.
+    // The session cookies must be set and sent along with the requests for the
+    // API to return successfully.
     if (!this.authenticated) {
       await this.authenticate();
     }
+
     return axios.get(`/api/tribproc/${cnj}`, {
-      withCredentials: true,
+      withCredentials: true, // To set session cookies.
       params: {
         tipo_numero: "8",
       },
@@ -25,16 +30,18 @@ export const apiStore = reactive({
 
   async authenticate(): Promise<any> {
     if (this.authenticated) return Promise.resolve();
+
     const ctrl = new AbortController();
     this.controllers.push(ctrl);
-    const res = await axios.post(
+
+    await axios.post(
       "/user/login",
       {
         "credentials.username": import.meta.env.VITE_API_USERNAME,
         "credentials.password": import.meta.env.VITE_API_PASSWORD,
       },
       {
-        withCredentials: true,
+        withCredentials: true, // To set session cookies.
         headers: {
           "content-type": "application/x-www-form-urlencoded",
         },

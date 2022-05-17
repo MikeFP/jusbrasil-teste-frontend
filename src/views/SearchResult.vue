@@ -15,6 +15,7 @@ import useToggle from "@/utils/use-toggle";
 import capitalize from "@/utils/capitalize";
 import Spinner from "@/icons/Spinner.vue";
 import { isValidCnj, cnjMask } from "@/utils/validators";
+import { AxiosError } from "axios";
 
 const router = useRouter();
 const route = useRoute();
@@ -28,6 +29,7 @@ const searchQuery = ref(props.cnj);
 const processo = ref<Processo | null>(null);
 const isLoading = ref(true);
 const errorMessage = ref<string | null>(null);
+const apiErrorMessage = ref<string | null>(null);
 
 watch(
   () => route.name,
@@ -41,6 +43,7 @@ watch(
 function fetch() {
   processo.value = null;
   isLoading.value = true;
+  apiErrorMessage.value = null;
   apiStore.cancelRequests();
   apiStore
     .search(cnj.value)
@@ -49,11 +52,20 @@ function fetch() {
       isLoading.value = false;
     })
     .catch((err) => {
-      if (!err.code || err.code != "ERR_CANCELED") {
-        processo.value = mock;
-        isLoading.value = false;
+      isLoading.value = false;
+      if (err.code && err.code == "ERR_CANCELED") {
+        // Route was popped.
+        return;
+      }
+      // [NOTE]: Remove this line when API works.
+      processo.value = mock;
+      if (err instanceof AxiosError && err.response.status == 404) {
+        // [NOTE]: Uncomment this line when API works.
+        // apiErrorMessage.value = "Processo não encontrado";
       } else {
-        console.error(err);
+        console.log(err);
+        // [NOTE]: Uncomment this line when API works.
+        // apiErrorMessage.value = "Ocorreu um erro inesperado, tente novamente";
       }
     });
 }
@@ -80,6 +92,7 @@ function search() {
 if (validate()) {
   fetch();
 } else {
+  // Redirect to home if invalid CNJ.
   router.replace("/");
 }
 
@@ -197,6 +210,7 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
           <span v-if="!processo.gratuita && !processo.segredo_justica && !processo.liminar">-</span>
         </div>
         <div><span>Natureza:</span>{{ natureza }}</div>
+        <div><span>Instância: </span> {{ Instancia.getDescricao(processo.instancia) }}</div>
         <div v-if="processo.valor">
           <span>Valor da causa:</span
           >{{
@@ -230,7 +244,6 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         <h5>Outras informações</h5>
 
         <div class="props mt-2">
-          <div><span>Instância: </span> {{ Instancia.getDescricao(processo.instancia) }}</div>
           <div>
             <span>Distribuição: </span> {{ processo.distribuicaoTipo }}, em
             {{ Intl.DateTimeFormat("pt-BR").format(processo.distribuicaoData) }}
@@ -282,33 +295,14 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         <ParteModal ref="parteModal" />
       </div>
 
-      <div class="section">
+      <div class="section" v-if="(processo.processosRelacionados?.length || 0) > 0">
         <h3>Processos Relacionados</h3>
         <hr />
-        <p v-if="(processo.processosRelacionados?.length || 0) == 0">Nenhum</p>
         <div class="section-list" v-for="relacionado in processo.processosRelacionados">
           <div class="title">Tribunal {{ relacionado.tribunal }} - {{ relacionado.natureza }}</div>
           <div class="subtitle">
             {{ Intl.DateTimeFormat("pt-BR").format(relacionado.distribuicao_data) }} ·
             {{ relacionado.numero }}
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h3>Audiências</h3>
-        <hr />
-        <p v-if="(processo.audiencias?.length || 0) == 0">Sem audiências</p>
-        <div class="section-list" v-for="audiencia in processo.audiencias">
-          <div class="title">{{ audiencia.tipo }} - {{ audiencia.local }}</div>
-          <div class="subtitle">
-            <Chip
-              v-if="audiencia.situacao"
-              :dense="true"
-              class="bg-red-500 border-none text-gray-100"
-              >{{ audiencia.situacao }}</Chip
-            >
-            {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
           </div>
         </div>
       </div>
@@ -345,6 +339,24 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
         >
           <span v-if="movsListToggle.isToggled">Ocultar movimentações</span>
           <span v-else>Ver mais {{ processo.movs.length - 3 }} movimentações</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Audiências</h3>
+        <hr />
+        <p v-if="(processo.audiencias?.length || 0) == 0">Sem audiências</p>
+        <div class="section-list" v-for="audiencia in processo.audiencias">
+          <div class="title">{{ audiencia.tipo }} - {{ audiencia.local }}</div>
+          <div class="subtitle">
+            <Chip
+              v-if="audiencia.situacao"
+              :dense="true"
+              class="bg-red-500 border-none text-gray-100"
+              >{{ audiencia.situacao }}</Chip
+            >
+            {{ Intl.DateTimeFormat("pt-BR").format(audiencia.data) }}
+          </div>
         </div>
       </div>
 
@@ -392,6 +404,12 @@ const anexoModal = ref<typeof AnexoModal | null>(null);
       <div class="m-auto flex flex-col items-center gap-2">
         Pesquisando por {{ searchQuery }}
         <Spinner class="text-red-700 animate-spin w-8 h-8" />
+      </div>
+    </div>
+
+    <div v-if="apiErrorMessage" class="flex h-full m-8 text-orange-600">
+      <div class="m-auto flex flex-col items-center gap-2">
+        {{ apiErrorMessage }}
       </div>
     </div>
   </div>

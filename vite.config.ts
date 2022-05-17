@@ -19,12 +19,11 @@ export default defineConfig({
   server: {
     proxy: {
       "^/api|/user": {
+        // All requests to this domain must be made to localhost instead.
         target: "https://op.digesto.com.br",
+        // To avoid CORS error (the sole reason why we are even using this proxy).
         changeOrigin: true,
-        followRedirects: true,
-        headers: {
-          Authorization: "Bearer 5af8ba4c-43e3-4361-9e9c-f73458ab6a5b",
-        },
+        followRedirects: true, // API redirects on login.
       },
     },
   },
