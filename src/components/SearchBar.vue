@@ -37,7 +37,7 @@ defineExpose({
     title="CNJ do processo"
     placeholder="CNJ do processo"
     :value="modelValue"
-    @input="$emit('update:modelValue', ($event?.target as HTMLInputElement).value)"
+    @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     @keypress.enter="$emit('submit')"
   />
 </template>

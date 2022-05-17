@@ -6,8 +6,8 @@ export default function dateReviver(key: string, value: any) {
     var a = value.match(reISO);
     if (a && a.length > 0) {
       // Date parse is inconsistent if ISO string is in (YYYY-MM-DD)T format.
-      // To avoid it, replace hyphens with slashes.
-      return new Date(a[0].replace(/-/g, "/").replace(/T/, " "));
+      // To avoid it, replace T with blank space.
+      return new Date(a[0].replace(/T/, " "));
     }
     // Might be a wacky Microsoft-format string.
     a = reMsAjax.exec(value);

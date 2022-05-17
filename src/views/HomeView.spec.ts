@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, config } from "@vue/test-utils";
 import HomeView from "./HomeView.vue";
+import Maska from "maska";
 
 describe("home page ui", () => {
   it("search bar should be autofocused", () => {
     const wrapper = mount(HomeView, {
-      props: {},
+      global: {
+        plugins: [Maska],
+      },
     });
     // expect(document.activeElement).equals(wrapper.find("input"));
   });
