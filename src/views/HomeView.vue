@@ -36,7 +36,10 @@ function search() {
         @submit="search"
         class="lg:max-w-[50vw] md:max-w-[70vw] flex-grow"
       ></SearchBar>
-      <span v-if="errorMessage" class="text-yellow-400 absolute -bottom-12"
+      <span
+        data-testid="error-message"
+        v-if="errorMessage"
+        class="text-yellow-400 absolute -bottom-12"
         ><font-awesome-icon icon="circle-exclamation" class="mr-2" />{{ errorMessage }}</span
       >
     </div>
